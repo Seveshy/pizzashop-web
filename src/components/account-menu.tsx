@@ -1,12 +1,13 @@
 import { Building, ChevronDown, LogOut } from "lucide-react";
 import { Button } from "./ui/button";
-import { DropdownMenu, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import {
+  DropdownMenu,
+  DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-} from "@radix-ui/react-dropdown-menu";
+} from "./ui/dropdown-menu";
 
 export function AccountMenu() {
   return (
