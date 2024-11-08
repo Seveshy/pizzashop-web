@@ -5,21 +5,45 @@ import { Button } from "../../components/ui/button";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
+import { signIn } from "../../api/sign-in";
 
 const signInForm = z.object({
   email: z.string().email(),
-})
+});
 
-type SignInForm = z.infer<typeof signInForm> 
+type SignInForm = z.infer<typeof signInForm>;
 
 export function SignIn() {
-  const { register, handleSubmit, formState: { isSubmitting } } = useForm<SignInForm>();
+  const [searchParams] = useSearchParams();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = useForm<SignInForm>({
+    defaultValues: {
+      email: searchParams.get("email") ?? "",
+    },
+  });
+
+  const { mutateAsync: authenticate } = useMutation({
+    mutationFn: signIn,
+  });
 
   async function handleSignIn(data: SignInForm) {
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    console.log(data);
-    toast.success("Enviamos um link de autenticação para o seu e-mail.")
+    try {
+      await authenticate({ email: data.email });
+      toast.success("Enviamos um link de autenticação para o seu e-mail.", {
+        action: {
+          label: "Reenviar",
+          onClick: () => handleSignIn(data),
+        },
+      });
+    } catch {
+      toast.error("Credenciais inválidas.");
+    }
   }
 
   return (
@@ -27,9 +51,7 @@ export function SignIn() {
       <Helmet title="Login" />
       <div className="p-8">
         <Button asChild variant="ghost" className="absolute right-8 top-8">
-          <Link to="/sign-up">
-            Novo estabelecimento
-          </Link>
+          <Link to="/sign-up">Novo estabelecimento</Link>
         </Button>
         <div className="flex w-[350px] flex-col justify-center gap-6">
           <div className="flex flex-col gap-2 text-center">
@@ -44,7 +66,7 @@ export function SignIn() {
           <form className="space-y-4" onSubmit={handleSubmit(handleSignIn)}>
             <div className="space-y-2">
               <Label htmlFor="email">Seu e-mail</Label>
-              <Input id="email" type="email"  {...register("email")} />
+              <Input id="email" type="email" {...register("email")} />
             </div>
             <Button disabled={isSubmitting} className="w-full" type="submit">
               Acessar painel
