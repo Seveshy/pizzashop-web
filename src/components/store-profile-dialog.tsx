@@ -11,7 +11,10 @@ import {
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
-import { getManagedRestaurant } from "../api/get-managed-restaurant";
+import {
+  getManagedRestaurant,
+  GetManagedRestaurantResponse,
+} from "../api/get-managed-restaurant";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -20,7 +23,7 @@ import { updateProfile } from "../api/update-profile";
 
 const storeProfileSchema = z.object({
   name: z.string().min(1),
-  description: z.string(),
+  description: z.string().nullable(),
 });
 
 type StoreProfileSchema = z.infer<typeof storeProfileSchema>;
@@ -46,16 +49,36 @@ export function StoreProfileDialog() {
     },
   });
 
+  function updateManagedRestaurantCache({
+    name,
+    description,
+  }: StoreProfileSchema) {
+    const cached = queryClient.getQueryData<GetManagedRestaurantResponse>([
+      "managed-restaurant",
+    ]);
+
+    if (cached) {
+      queryClient.setQueryData(["managed-restaurant"], {
+        ...cached,
+        name,
+        description,
+      });
+    }
+
+    return { cached };
+  }
+
   const { mutateAsync: updateProfileFn } = useMutation({
     mutationFn: updateProfile,
-    onSuccess(_, { name, description }) {
-      const cached = queryClient.getQueryData(["managed-restaurant"]);
-      if (cached) {
-        queryClient.setQueryData(["managed-restaurant"], {
-          ...cached,
-          name,
-          description,
-        });
+    onMutate({ name, description }) {
+      const { cached } = updateManagedRestaurantCache({ name, description });
+
+      return { previusProfile: cached };
+    },
+
+    onError(_, __, context) {
+      if (context?.previusProfile) {
+        updateManagedRestaurantCache(context.previusProfile);
       }
     },
   });
