@@ -23,30 +23,31 @@ import { DateRangePricker } from "../../../components/ui/date-range-picker";
 import { useMemo, useState } from "react";
 import { DateRange } from "react-day-picker";
 import { subDays } from "date-fns";
-
+import { Loader2 } from "lucide-react";
 
 export function RevenueChart() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: subDays(new Date(), 7),
-    to: new Date()
-  })
+    to: new Date(),
+  });
 
   const { data: dailyRevenuePeriod } = useQuery({
     queryKey: ["metrics", "daily-revenue-in-period", dateRange],
-    queryFn: () => getDailyRevenueInPeriod({
-      from: dateRange?.from,
-      to: dateRange?.to
-    }),
+    queryFn: () =>
+      getDailyRevenueInPeriod({
+        from: dateRange?.from,
+        to: dateRange?.to,
+      }),
   });
 
   const chartData = useMemo(() => {
     return dailyRevenuePeriod?.map((chartItem) => {
-        return {
-          date: chartItem.date,
-          receipt: chartItem.receipt / 100
-        }
-    })
-  }, [dailyRevenuePeriod])
+      return {
+        date: chartItem.date,
+        receipt: chartItem.receipt / 100,
+      };
+    });
+  }, [dailyRevenuePeriod]);
 
   return (
     <Card className="col-span-6">
@@ -63,7 +64,7 @@ export function RevenueChart() {
         </div>
       </CardHeader>
       <CardContent>
-        {chartData && (
+        {chartData ? (
           <ResponsiveContainer width="100%" height={240}>
             <LineChart data={dailyRevenuePeriod} style={{ fontSize: 12 }}>
               <XAxis dataKey="date" tickLine={false} axisLine={false} dy={16} />
@@ -89,6 +90,10 @@ export function RevenueChart() {
               />
             </LineChart>
           </ResponsiveContainer>
+        ) : (
+          <div className="flex h-[248px] w-full items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
         )}
       </CardContent>
     </Card>

@@ -24,42 +24,40 @@ type OrderFilterSchema = z.infer<typeof orderFilterSchema>;
 export function OrderTableFilters() {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const orderId = searchParams.get('orderId');
-  const customerName = searchParams.get('customerName');
-  const status = searchParams.get('status');
+  const { register, handleSubmit, control, reset } = useForm<OrderFilterSchema>(
+    {
+      resolver: zodResolver(orderFilterSchema),
+    },
+  );
 
-  const { register, handleSubmit, control, reset } = useForm<OrderFilterSchema>({
-    resolver: zodResolver(orderFilterSchema),
-  });
-
-  function handleFilter({ orderId, customerName, status}: OrderFilterSchema) {
-    setSearchParams(state => {
+  function handleFilter({ orderId, customerName, status }: OrderFilterSchema) {
+    setSearchParams((state) => {
       if (orderId) {
-        state.set('orderId', orderId)
+        state.set("orderId", orderId);
       } else {
-        state.delete('orderId')
+        state.delete("orderId");
       }
       if (customerName) {
-        state.set('customerName', customerName)
+        state.set("customerName", customerName);
       } else {
-        state.delete('customerName')
+        state.delete("customerName");
       }
       if (status) {
-        state.set('status', status)
+        state.set("status", status);
       } else {
-        state.delete('status')
+        state.delete("status");
       }
 
-      state.set('page', '1')
+      state.set("page", "1");
 
       return state;
-    })
+    });
 
     reset({
-      orderId: '',
-      customerName: '',
-      status: 'all'
-    })
+      orderId: "",
+      customerName: "",
+      status: "all",
+    });
   }
 
   function handleClearFilter() {
@@ -67,15 +65,16 @@ export function OrderTableFilters() {
       state.delete("orderId");
       state.delete("customerName");
       state.delete("status");
-      state.set("page", '1');
+      state.set("page", "1");
       return state;
     });
   }
 
   return (
-    <form 
+    <form
       onSubmit={handleSubmit(handleFilter)}
-      className="flex items-center gap-2">
+      className="flex items-center gap-2"
+    >
       <span className="text-sm font-semibold">Filtros:</span>
       <Input
         placeholder="ID do pedido"
@@ -120,7 +119,12 @@ export function OrderTableFilters() {
         <Search className="mr-2 h-4 w-4" />
         Filtrar resultados
       </Button>
-      <Button onClick={handleClearFilter} type="button" variant="outline" size="xs">
+      <Button
+        onClick={handleClearFilter}
+        type="button"
+        variant="outline"
+        size="xs"
+      >
         <X className="mr-2 h-4 w-4" />
         Remover filtros
       </Button>

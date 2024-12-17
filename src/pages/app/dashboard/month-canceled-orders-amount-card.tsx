@@ -7,13 +7,13 @@ import {
 } from "../../../components/ui/card";
 import { getMonthCanceledOrdersAmount } from "../../../api/get-month-canceled-orders";
 import { useQuery } from "@tanstack/react-query";
+import { MetricCardSkeleton } from "./metric-card-skeleton";
 
 export function MonthCanceledOrdersAmuntCard() {
   const { data: monthCanceledOrdersAmount } = useQuery({
     queryFn: getMonthCanceledOrdersAmount,
     queryKey: ["metrycs", "month-canceled-orders-amount"],
   });
-
 
   return (
     <Card>
@@ -24,7 +24,7 @@ export function MonthCanceledOrdersAmuntCard() {
         <DollarSign className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent className="space-y-1">
-      {monthCanceledOrdersAmount && (
+        {monthCanceledOrdersAmount ? (
           <>
             {" "}
             <span className="text-2xl font-semibold tracking-tight">
@@ -48,6 +48,8 @@ export function MonthCanceledOrdersAmuntCard() {
               )}
             </p>
           </>
+        ) : (
+          <MetricCardSkeleton />
         )}
       </CardContent>
     </Card>
